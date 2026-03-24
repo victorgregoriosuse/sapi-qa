@@ -8,6 +8,7 @@ import os
 import sys
 import argparse
 import configparser
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # Load Configuration
@@ -48,9 +49,12 @@ def get_packages():
         print(f"Error fetching package list: {e}")
         sys.exit(1)
 
-def run_test(package, verbose=False):
+def run_test(package, verbose=False, use_prefix=False):
     """Run the installation test for a single package."""
-    print(f"Testing package: {package}...")
+    prefix = f"[{package}] " if use_prefix else ""
+    if not use_prefix:
+        print(f"Testing package: {package}...")
+    
     command = [
         "docker", "run", "--rm",
         "--platform", PLATFORM,
@@ -75,7 +79,7 @@ def run_test(package, verbose=False):
         if process.stdout:
             for line in process.stdout:
                 if verbose:
-                    print(f"  {line.strip()}")
+                    print(f"{prefix}{line.strip()}")
                 stdout_lines.append(line)
             
         process.wait()
@@ -160,6 +164,7 @@ def parse_args():
     
     parser.add_argument("--dry-run", action="store_true", help="Fetch package list but do not run Docker tests")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show live output from the installer")
+    parser.add_argument("--parallel", "-p", type=int, default=1, help="Number of concurrent tests to run")
     return parser.parse_args()
 
 def main():
@@ -183,10 +188,20 @@ def main():
              print(f"[DRY RUN] Would test package: {package}")
         return
 
-    for i, package in enumerate(packages):
-        print(f"[{i+1}/{len(packages)}] Processing {package}...")
-        result = run_test(package, verbose=args.verbose)
-        results.append(result)
+    if args.parallel > 1:
+        num_workers = min(args.parallel, len(packages))
+        print(f"Running {num_workers} tests in parallel...")
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            future_to_pkg = {executor.submit(run_test, pkg, args.verbose, True): pkg for pkg in packages}
+            for i, future in enumerate(as_completed(future_to_pkg)):
+                pkg = future_to_pkg[future]
+                print(f"[{i+1}/{len(packages)}] Finished testing {pkg}")
+                results.append(future.result())
+    else:
+        for i, package in enumerate(packages):
+            print(f"[{i+1}/{len(packages)}] Processing {package}...")
+            result = run_test(package, verbose=args.verbose)
+            results.append(result)
         
     generate_report(results)
 

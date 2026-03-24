@@ -28,8 +28,9 @@ python3 sapi_qa.py
 ### Options
 -   `--limit N`: Test only the first N packages.
 -   `--packages "pkg1,pkg2"`: Test specific packages (comma-separated). Skips fetching the full index. Mutually exclusive with `--limit`.
+-   `--parallel N` or `-p N`: Run N tests in parallel. Defaults to 1.
 -   `--dry-run`: Fetch the package list (or use provided packages) but skip Docker tests.
--   `--verbose` or `-v`: Show live output from the `pip install` commands.
+-   `--verbose` or `-v`: Show live output from the `pip install` commands. In parallel mode, output is prefixed with the package name.
 
 ## Output
 Reports are generated in the `reports/` directory:

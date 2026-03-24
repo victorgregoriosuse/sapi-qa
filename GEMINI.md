@@ -44,6 +44,9 @@ python3 sapi_qa.py --packages "garak,numpy"
 # Test with live output
 python3 sapi_qa.py --verbose
 
+# Run tests in parallel
+python3 sapi_qa.py --parallel 5
+
 # Limit number of packages from index
 python3 sapi_qa.py --limit 10
 
