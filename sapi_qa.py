@@ -107,15 +107,21 @@ def run_test(package, verbose=False, use_prefix=False):
             "return_code": -1
         }
 
-def generate_report(results):
+def generate_report(results, config_data):
     """Generate JSON and Markdown reports."""
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     json_filename = f"{REPORT_DIR}/sapi_qa_report_{timestamp}.json"
     md_filename = f"{REPORT_DIR}/sapi_qa_summary_{timestamp}.md"
     
+    report_data = {
+        "timestamp": timestamp,
+        "config": config_data,
+        "results": results
+    }
+    
     # Write JSON report
     with open(json_filename, 'w') as f:
-        json.dump(results, f, indent=4)
+        json.dump(report_data, f, indent=4)
     print(f"JSON report saved to {json_filename}")
     
     # Write Markdown summary
@@ -125,11 +131,17 @@ def generate_report(results):
     
     with open(md_filename, 'w') as f:
         f.write(f"# SAPI QA Report - {timestamp}\n\n")
+        f.write("## Configuration\n")
+        f.write(f"- **Index URL:** {config_data['INDEX_URL']}\n")
+        f.write(f"- **Docker Image:** {config_data['DOCKER_IMAGE']}\n")
+        f.write(f"- **Platform:** {config_data['PLATFORM']}\n\n")
+        
+        f.write("## Summary\n")
         f.write(f"- **Total Packages:** {total_count}\n")
         f.write(f"- **Success:** {success_count}\n")
         f.write(f"- **Failures:** {failure_count}\n\n")
 
-        f.write("## Test Summary\n\n")
+        f.write("## Test Details\n\n")
         f.write("| Package | Status | Duration (s) |\n")
         f.write("| :--- | :--- | :--- |\n")
         for r in results:
@@ -203,7 +215,13 @@ def main():
             result = run_test(package, verbose=args.verbose)
             results.append(result)
         
-    generate_report(results)
+    current_config = {
+        "INDEX_URL": INDEX_URL,
+        "BASE_INDEX_URL": BASE_INDEX_URL,
+        "DOCKER_IMAGE": DOCKER_IMAGE,
+        "PLATFORM": PLATFORM
+    }
+    generate_report(results, current_config)
 
 if __name__ == "__main__":
     main()
