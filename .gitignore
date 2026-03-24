@@ -1,0 +1,13 @@
+# Virtual environment
+venv/
+
+# Reports
+reports/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS-specific
+.DS_Store

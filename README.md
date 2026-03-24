@@ -1,0 +1,37 @@
+# SAPI QA Suite
+
+This suite tests the installation of packages from the SUSE AI Package Index (SAPI).
+
+## Prerequisites
+-   Python 3.x
+-   Docker (running and accessible by the user)
+-   Internet connection
+
+## Setup
+1.  Create and activate a virtual environment (recommended):
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+2.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Usage
+Run the main script:
+```bash
+python3 sapi_qa.py
+```
+
+## Output
+Reports are generated in the `reports/` directory:
+-   `sapi_qa_report_YYYYMMDD_HHMMSS.json`: Detailed machine-readable results.
+-   `sapi_qa_summary_YYYYMMDD_HHMMSS.md`: Human-readable summary with error logs.
+
+## Configuration
+Edit `sapi_qa.py` to modify:
+-   `INDEX_URL`: The URL of the simple index.
+-   `DOCKER_IMAGE`: The container image used for testing.
+-   `PLATFORM`: The Docker platform (e.g., `linux/amd64`).
