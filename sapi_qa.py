@@ -128,7 +128,11 @@ def generate_report(results):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="SAPI QA Suite")
-    parser.add_argument("--limit", type=int, help="Limit the number of packages to test")
+    
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--limit", type=int, help="Limit the number of packages to test")
+    group.add_argument("--packages", type=str, help="Comma-separated list of packages to test (skips index fetch)")
+    
     parser.add_argument("--dry-run", action="store_true", help="Fetch package list but do not run Docker tests")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show live output from the installer")
     return parser.parse_args()
@@ -136,11 +140,15 @@ def parse_args():
 def main():
     args = parse_args()
     setup_reports()
-    packages = get_packages()
     
-    if args.limit:
-        packages = packages[:args.limit]
-        print(f"Limiting to first {args.limit} packages.")
+    if args.packages:
+        packages = [p.strip() for p in args.packages.split(',') if p.strip()]
+        print(f"Testing {len(packages)} specified package(s): {', '.join(packages)}")
+    else:
+        packages = get_packages()
+        if args.limit:
+            packages = packages[:args.limit]
+            print(f"Limiting to first {args.limit} packages.")
     
     results = []
     

@@ -27,7 +27,8 @@ python3 sapi_qa.py
 
 ### Options
 -   `--limit N`: Test only the first N packages.
--   `--dry-run`: Fetch the package list but skip Docker tests.
+-   `--packages "pkg1,pkg2"`: Test specific packages (comma-separated). Skips fetching the full index. Mutually exclusive with `--limit`.
+-   `--dry-run`: Fetch the package list (or use provided packages) but skip Docker tests.
 -   `--verbose` or `-v`: Show live output from the `pip install` commands.
 
 ## Output
