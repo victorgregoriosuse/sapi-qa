@@ -45,7 +45,7 @@ Example `config.local.ini`:
 ```ini
 [DOCKER]
 # Use a different image for local testing
-IMAGE = registry.suse.com/bci/python:3.12
+IMAGE = registry.suse.com/bci/python:3.13
 ```
 
 Available settings (see `config.ini` for defaults):
