@@ -7,14 +7,28 @@ import datetime
 import os
 import sys
 import argparse
+import configparser
 from pathlib import Path
 
-# Configuration
-INDEX_URL = "https://sapi.suse.com/beta/simple/index.html"
-BASE_INDEX_URL = "https://sapi.suse.com/beta/simple"
-DOCKER_IMAGE = "registry.suse.com/bci/python:3.11"
-PLATFORM = "linux/amd64"
-REPORT_DIR = "reports"
+# Load Configuration
+config = configparser.ConfigParser()
+config_files = ['config.ini', 'config.local.ini']
+read_files = config.read(config_files)
+
+# Ensure base config is present
+if 'config.ini' not in read_files and not os.path.exists('config.ini'):
+    print("Error: config.ini not found. Please ensure the default configuration exists.")
+    sys.exit(1)
+
+try:
+    INDEX_URL = config.get('SAPI', 'INDEX_URL')
+    BASE_INDEX_URL = config.get('SAPI', 'BASE_INDEX_URL')
+    DOCKER_IMAGE = config.get('DOCKER', 'IMAGE')
+    PLATFORM = config.get('DOCKER', 'PLATFORM')
+    REPORT_DIR = config.get('REPORTING', 'DIR')
+except (configparser.NoSectionError, configparser.NoOptionError) as e:
+    print(f"Configuration Error: {e}")
+    sys.exit(1)
 
 def setup_reports():
     """Ensure the reports directory exists."""

@@ -61,4 +61,8 @@ python3 sapi_qa.py --dry-run
 - **Reporting:** 
     - Reports are timestamped: `sapi_qa_report_YYYYMMDD_HHMMSS.json` and `sapi_qa_summary_YYYYMMDD_HHMMSS.md`.
     - Stderr is limited to the last 1000 characters in MD reports to maintain readability.
-- **Configuration:** Key constants like `INDEX_URL`, `DOCKER_IMAGE`, and `PLATFORM` are defined at the top of `sapi_qa.py`.
+- **Configuration:** 
+    - Defaults are stored in `config.ini` (committed).
+    - User overrides can be placed in `config.local.ini` (ignored by git).
+    - The system uses `configparser` to load and merge these files.
+    - Key settings: `INDEX_URL`, `BASE_INDEX_URL`, `DOCKER IMAGE`, `PLATFORM`, and `REPORT_DIR`.

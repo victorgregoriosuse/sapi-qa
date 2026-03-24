@@ -1,6 +1,9 @@
 # Virtual environment
 venv/
 
+# Configuration overrides
+config.local.ini
+
 # Reports
 reports/
 
