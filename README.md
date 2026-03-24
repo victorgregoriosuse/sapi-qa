@@ -25,6 +25,11 @@ Run the main script:
 python3 sapi_qa.py
 ```
 
+### Options
+-   `--limit N`: Test only the first N packages.
+-   `--dry-run`: Fetch the package list but skip Docker tests.
+-   `--verbose` or `-v`: Show live output from the `pip install` commands.
+
 ## Output
 Reports are generated in the `reports/` directory:
 -   `sapi_qa_report_YYYYMMDD_HHMMSS.json`: Detailed machine-readable results.

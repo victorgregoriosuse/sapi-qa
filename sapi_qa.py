@@ -34,7 +34,7 @@ def get_packages():
         print(f"Error fetching package list: {e}")
         sys.exit(1)
 
-def run_test(package):
+def run_test(package, verbose=False):
     """Run the installation test for a single package."""
     print(f"Testing package: {package}...")
     command = [
@@ -47,24 +47,35 @@ def run_test(package):
     ]
     
     start_time = datetime.datetime.now().isoformat()
+    stdout_lines = []
+    
     try:
-        result = subprocess.run(
+        # We combine stdout and stderr to simplify live logging
+        process = subprocess.Popen(
             command,
-            capture_output=True,
-            text=True,
-            check=False
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
         )
+        
+        if process.stdout:
+            for line in process.stdout:
+                if verbose:
+                    print(f"  {line.strip()}")
+                stdout_lines.append(line)
+            
+        process.wait()
         end_time = datetime.datetime.now().isoformat()
         
-        status = "SUCCESS" if result.returncode == 0 else "FAILURE"
+        status = "SUCCESS" if process.returncode == 0 else "FAILURE"
         return {
             "package": package,
             "status": status,
             "start_time": start_time,
             "end_time": end_time,
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "return_code": result.returncode
+            "stdout": "".join(stdout_lines),
+            "stderr": "",  # Captured in stdout for simplicity
+            "return_code": process.returncode
         }
     except Exception as e:
         end_time = datetime.datetime.now().isoformat()
@@ -73,7 +84,7 @@ def run_test(package):
             "status": "ERROR",
             "start_time": start_time,
             "end_time": end_time,
-            "stdout": "",
+            "stdout": "".join(stdout_lines),
             "stderr": str(e),
             "return_code": -1
         }
@@ -119,6 +130,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="SAPI QA Suite")
     parser.add_argument("--limit", type=int, help="Limit the number of packages to test")
     parser.add_argument("--dry-run", action="store_true", help="Fetch package list but do not run Docker tests")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show live output from the installer")
     return parser.parse_args()
 
 def main():
@@ -136,14 +148,11 @@ def main():
         print("Dry run enabled. Skipping Docker tests.")
         for package in packages:
              print(f"[DRY RUN] Would test package: {package}")
-        # Even in dry run, maybe generate a report of what was found?
-        # But report logic expects 'status' etc.
-        # Just return for now as per previous logic.
         return
 
     for i, package in enumerate(packages):
         print(f"[{i+1}/{len(packages)}] Processing {package}...")
-        result = run_test(package)
+        result = run_test(package, verbose=args.verbose)
         results.append(result)
         
     generate_report(results)
