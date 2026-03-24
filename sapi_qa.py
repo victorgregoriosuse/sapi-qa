@@ -110,18 +110,29 @@ def generate_report(results):
         f.write(f"- **Total Packages:** {total_count}\n")
         f.write(f"- **Success:** {success_count}\n")
         f.write(f"- **Failures:** {failure_count}\n\n")
+
+        f.write("## Test Summary\n\n")
+        f.write("| Package | Status | Duration (s) |\n")
+        f.write("| :--- | :--- | :--- |\n")
+        for r in results:
+            start = datetime.datetime.fromisoformat(r['start_time'])
+            end = datetime.datetime.fromisoformat(r['end_time'])
+            duration = (end - start).total_seconds()
+            f.write(f"| {r['package']} | {r['status']} | {duration:.2f} |\n")
+        f.write("\n")
         
         if failure_count > 0:
-            f.write("## Failures\n\n")
+            f.write("## Detailed Failure Logs\n\n")
             for r in results:
                 if r['status'] != 'SUCCESS':
                     f.write(f"### {r['package']}\n")
                     f.write(f"- **Status:** {r['status']}\n")
                     f.write(f"- **Return Code:** {r['return_code']}\n")
-                    f.write("#### Stderr:\n")
+                    f.write("#### Logs (last 1000 characters):\n")
                     f.write("```\n")
-                    # Limit stderr output to avoid huge files
-                    f.write(r['stderr'][-1000:] if r['stderr'] else "No stderr output")
+                    # Combined output is in 'stdout'
+                    output = r['stdout'] if r['stdout'] else r['stderr']
+                    f.write(output[-1000:] if output else "No output captured")
                     f.write("\n```\n\n")
     
     print(f"Markdown summary saved to {md_filename}")
